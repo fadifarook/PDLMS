@@ -7,7 +7,7 @@ AA MAIN contains all the code for controlling the High Voltage, Pulse Generator 
 from time to mass/charge ratios.
 
 
-RUN contains the GUI code and the other files contain all the relevant functions, this is the only file that is run. TopLevelVariables is the only variables that need changing.
+RUN contains the GUI code and the other files contain all the relevant functions, **this is the only file that is run**. TopLevelVariables is the only variables that need changing.
 
 **Required modules:**
 
