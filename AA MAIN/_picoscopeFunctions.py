@@ -119,7 +119,7 @@ class picoscopeFunctions:
         fig1.set_size_inches(11, 5)
         ax1.plot(x, y, '#000000')
         ax1.set_xlabel(r'time ($\mu s$)')
-        ax1.set_ylabel('Intensity (V)')
+        ax1.set_ylabel('Intensity (mV)')
         ax1.set_title('Before Conversion')
         canvas1 = FigureCanvasTkAgg(fig1, master=self.root)
         canvas1.draw()
@@ -175,7 +175,7 @@ class picoscopeFunctions:
             global x,y
             x_converted, y_converted = convert(x, y, self.slider.get())
 
-            TopLevelVariables.saveFolder = f'{TopLevelVariables.saveFolder}\\{time.strftime("%d%b%Y", time.gmtime())}'
+            # TopLevelVariables.saveFolder = f'{TopLevelVariables.saveFolder}\\{time.strftime("%d%b%Y", time.gmtime())}'
 
             if not os.path.exists(TopLevelVariables.saveFolder):
                 os.mkdir(TopLevelVariables.saveFolder)
@@ -194,7 +194,7 @@ class picoscopeFunctions:
 
             axs[0].plot(x, y, '#000000')
             axs[0].set_xlabel(r'time ($\mu s$)')
-            axs[0].set_ylabel('Intensity (V)')
+            axs[0].set_ylabel('Intensity (mV)')
             axs[0].set_title('Before Conversion')
 
             axs[1].plot(x_converted, y_converted, color='#000000')

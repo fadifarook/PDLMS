@@ -1,8 +1,11 @@
+import time
+
 """Top Level Variables to be Changed"""
 rampup = 20  # Voltage for ramping Up
 rampdown = 50
 
 saveFolder = r"C:\Users\pdlms\OneDrive\Desktop\Mass Spec\AA MAIN\Data"   #r'C:\Users\pdlms\OneDrive\Desktop\Mass Spec\Data'
+saveFolder = f'{saveFolder}\\{time.strftime("%d%b%Y", time.gmtime())}'
 
 testFile = r'C:\Users\pdlms\OneDrive\Desktop\Mass Spec\Testing4.csv'
 
