@@ -17,7 +17,7 @@ def massSpecProgram(identifier='test', xlsfilename='test.xls', waittime=60000, o
     # Create chandle and status ready for use
     status = {}
 
-    print(chandle)
+    # print(chandle)
 
     if not opened:
         chandle = ctypes.c_int16()

@@ -192,6 +192,18 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
                                         command=None)
         self.checkbox.place(relx=0.25, rely = 0.12)
 
+        # # Pulse Repeated or not
+        # self.repeated = ctk.CTkCheckBox(master=self.root, 
+        #                                 text="2 Hz pulse", 
+        #                                 command=self.repeat)
+        # self.repeated.place(relx=0.25, rely = 0.15)
+
+        self.repeated = ctk.CTkComboBox(master=self.root,
+                                        values=["Single Shot", "1Hz", "2Hz",
+                                                "3Hz", "5Hz", "10Hz"],
+                                        command=self.repeat)
+        self.repeated.place(relx=0.24, rely = 0.15)
+
         '''Pulse Labels and Boxes'''
         # Pulse Width
         self.pulseWidthText = ctk.CTkLabel(master=self.root,
@@ -224,7 +236,7 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
                                    width=150,
                                    height=50,
                                    fg_color="#515151")
-        self.pulseDelayInput.insert(0,str(500))
+        self.pulseDelayInput.insert(0,str(15))
         self.pulseDelayInput.place(relx=0.12,rely=0.23)
 
 
@@ -275,10 +287,11 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
 
         # Pulse Button
         self.pulseButton = ctk.CTkButton(master = self.root,
-                               text="Send Pulse",
+                               text="Start Pulse",
                                width=150,
                                height=50,
-                               command=self.setupPulse)  # updates with the button
+                               command=self.runPulse,
+                               state='disabled')  # updates with the button
         self.pulseButton.place(relx=0.04,rely=0.4) 
 
         # Get Data from Picoscope
@@ -327,6 +340,26 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
                                         height = 50,
                                         command=self.save)
         self.saveButton.place(relx = 0.25, rely=0.92)
+
+
+        # Setup Pulse Button
+        self.setupPulseButton = ctk.CTkButton(master=self.root,
+                                        text = 'Setup Pulse Gen',
+                                        width = 150,
+                                        height = 50,
+                                        command=self.setupPulse)
+        self.setupPulseButton.place(relx=0.22, rely=0.23)
+
+
+        # # # Stop Repeat
+        # self.stopRepeatButton = ctk.CTkButton(master=self.root,
+        #                                 text = 'Stop repeat',
+        #                                 width = 80,
+        #                                 height = 25,
+        #                                 command=self.stopRepeat,
+        #                                 fg_color='#8b0000',
+        #                                 state='normal')
+        # self.stopRepeatButton.place(relx = 0.25, rely=0.18)
 
 
 
@@ -379,6 +412,22 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
                                           fg_color='transparent')
         self.LabelMCP.insert(0.0, f'MCP \n Vset: \n Vmon: \n Iset: \n Imon')
         self.LabelMCP.place(relx=0.245, rely=0.69)
+
+
+        # Pulse monitoring
+        self.LabelWidth = ctk.CTkTextbox(master=self.root,
+                                          width=150,
+                                          height=10,
+                                          fg_color='transparent')
+        self.LabelWidth.insert(0.0, f'Pulse Width: ')
+        self.LabelWidth.place(relx=0.13, rely=0.47)
+
+        self.LabelDelay = ctk.CTkTextbox(master=self.root,
+                                          width=150,
+                                          height=10,
+                                          fg_color='transparent')
+        self.LabelDelay.insert(0.0, f'Pulse Delay: ')
+        self.LabelDelay.place(relx=0.2, rely=0.47)
         
 
 
@@ -392,8 +441,9 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
     def closing(self):
         """When closing the gui, it shows error if not killed"""
         # global TopLevelVariables.gen
-        if isinstance(TopLevelVariables.caen, CAENDesktopHighVoltagePowerSupply):
-            self.open_toplevel(message="Kill the HV and PulseGenFirst")
+        if isinstance(TopLevelVariables.caen, CAENDesktopHighVoltagePowerSupply) and TopLevelVariables.block:
+            self.open_toplevel(message="Remember to Kill the Voltage Supply")
+            TopLevelVariables.block = False
         # time.sleep(3)
         else:
             sys.exit()

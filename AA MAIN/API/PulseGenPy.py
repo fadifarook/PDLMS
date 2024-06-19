@@ -39,6 +39,7 @@ class pulseGenerator:
         
         self.delay = 0
         self.trigger = 'TRIG'  # among 'DIS', 'TRIG'
+        self.per = 0.001
 
     def setup(self):
         self.pulseGen.write("*RST")
@@ -56,12 +57,12 @@ class pulseGenerator:
         self.pulseGen.write(f":PULSE2:WIDT {self.laser_width}")
         self.pulseGen.write(f":PULSE2:DELAY {self.delay}")
 
-        self.pulseGen.write(":PULSE3:STATE ON")  # uses channel C=2 : Belkhe
-        self.pulseGen.write(f":PULSE3:WIDT {self.width}")
-        self.pulseGen.write(f":PULSE3:DELAY {self.delay - delayBelkhe}")
+        # self.pulseGen.write(":PULSE3:STATE ON")  # uses channel C=2 : Belkhe
+        # self.pulseGen.write(f":PULSE3:WIDT {self.width}")
+        # self.pulseGen.write(f":PULSE3:DELAY {self.delay - delayBelkhe}")
 
         self.pulseGen.write(f":PULSE0:MODE {self.mode}")
-        self.pulseGen.write(f":PULSE0:PER 0.001")
+        self.pulseGen.write(f":PULSE0:PER {self.per}")
 
         time.sleep(0.1)
 
@@ -74,16 +75,16 @@ class pulseGenerator:
             self.pulseGen.write(":PULSE0:EXT:MODE DIS")
 
     def run(self):
-        self.setup()
-        time.sleep(0.1)  # otherwise its too fast
+        # self.setup()
+        # time.sleep(0.1)  # otherwise its too fast
         self.pulseGen.write(":PULSE0:STATE ON")
-        time.sleep(0.2)
-        if self.trigger == 'TRIG':
-            self.pulseGen.write('*TRG') # Remove when actual trigger
-        else:
-            # self.pulseGen.write(":PULSE0:STATE ON")
-            time.sleep(0.2)
-        # print(self.mode)
+        # time.sleep(0.2)
+        # if self.trigger == 'TRIG':
+        #     self.pulseGen.write('*TRG') # Remove when actual trigger
+        # else:
+        #     # self.pulseGen.write(":PULSE0:STATE ON")
+        #     time.sleep(0.2)
+        # # print(self.mode)
 
     def stop(self):
         self.pulseGen.write(":PULSE0:STATE OFF")
@@ -98,7 +99,7 @@ class pulseGenerator:
 
     def switchRestOff(self):
         # self.pulseGen.write(":PULSE2:STATE OFF")
-        # self.pulseGen.write(":PULSE3:STATE OFF")
+        self.pulseGen.write(":PULSE3:STATE OFF")
         self.pulseGen.write(":PULSE4:STATE OFF")
         self.pulseGen.write(":PULSE5:STATE OFF")
         self.pulseGen.write(":PULSE6:STATE OFF")

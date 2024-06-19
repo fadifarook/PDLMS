@@ -36,7 +36,10 @@ def convert(times, volt, mass_calibration):
     mzs = (times_us/mass_calibration)**2  # conversion from book
     cnts_temp = (mVs)
     relMax = max(cnts_temp)
-    cnts = cnts_temp/relMax
+    try:
+        cnts = cnts_temp/relMax
+    except:
+        return times,volt
 
     return mzs, cnts
 
@@ -115,6 +118,7 @@ class picoscopeFunctions:
         
 
         # Uncalibrated plotting
+        plt.switch_backend('agg')
         fig1, ax1 = plt.subplots()
         fig1.set_size_inches(11, 5)
         ax1.plot(x, y, '#000000')
@@ -130,17 +134,24 @@ class picoscopeFunctions:
         self.slider.set(float(self.input.get()))
 
         # Calibrated Plotting
+        plt.switch_backend('agg')
         fig, ax = plt.subplots()
         fig.set_size_inches(11,5)
-        x_converted, y_converted = convert(x, y, self.slider.get())
+        if TopLevelVariables.repeat:
+            x_converted, y_converted = 0, 0
+        else:
+            x_converted, y_converted = convert(x, y, self.slider.get())
         ax.plot(x_converted, y_converted, color='#000000')
         ax.set_xlabel('Mass/charge')
         ax.set_ylabel('Counts (relative)')
         ax.set_title('After Conversion')
+        ax.set_xticks(np.arange(min(x_converted), max(x_converted)+1, 2.0))
+        ax.grid()
         # fig.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
         canvas = FigureCanvasTkAgg(fig,master=self.root)
         canvas.draw()
         canvas.get_tk_widget().place(relx=0.35, rely=0.52)
+        
         self.root.update()
 
 
@@ -149,6 +160,7 @@ class picoscopeFunctions:
     def update_surface(self,other):
         """Adjust calibrated plot while moving slider"""
 
+        plt.switch_backend('agg')
         fig, ax = plt.subplots()
         fig.set_size_inches(11,5)
         x_converted, y_converted = convert(x, y, self.slider.get())
@@ -156,6 +168,8 @@ class picoscopeFunctions:
         ax.set_xlabel('Mass/charge')
         ax.set_ylabel('Counts (relative)')
         ax.set_title('After Conversion')
+        ax.set_xticks(np.arange(min(x_converted), max(x_converted)+1, 2.0))
+        ax.grid()
         # fig.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
         canvas = FigureCanvasTkAgg(fig,master=self.root)
         canvas.draw()
@@ -166,7 +180,7 @@ class picoscopeFunctions:
 
 
     def save(self):
-        """Save uncalibrated and Calibrated data into a textfile"""
+        """Save uncalibrated and Calibrated data into a textfile, conversion done during save"""
 
         if not self.saveInput.get():
             self.saveInput.configure(placeholder_text='File Name Not Entered')
@@ -189,6 +203,7 @@ class picoscopeFunctions:
 
             # Save Plots as well
 
+            plt.switch_backend('agg')
             fig, axs = plt.subplots(2)
             fig.suptitle(f'{self.saveInput.get()}')
 
@@ -201,6 +216,8 @@ class picoscopeFunctions:
             axs[1].set_xlabel('Mass/charge')
             axs[1].set_ylabel('Counts (relative)')
             axs[1].set_title('After Conversion')
+            axs[1].set_xticks(np.arange(min(x_converted), max(x_converted)+1, 2.0))
+            axs[1].grid()
 
             fig.tight_layout(pad=1.0)
 

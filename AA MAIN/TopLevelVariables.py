@@ -1,7 +1,7 @@
 import time
 
 """Top Level Variables to be Changed"""
-rampup = 20  # Voltage for ramping Up
+rampup = 50  # Voltage for ramping Up
 rampdown = 50
 
 saveFolder = r"C:\Users\pdlms\OneDrive\Desktop\Mass Spec\AA MAIN\Data"   #r'C:\Users\pdlms\OneDrive\Desktop\Mass Spec\Data'
@@ -29,5 +29,9 @@ MCPcaen = 0
 vacuumReady = False
 
 handle = None
+block = True
+
+repeat = False
+threadFunc = 0
 
 HV0 = HV1 = HV2 = HV3 = MCP = 0

@@ -119,6 +119,8 @@ class voltageFunctions:
 
     def kill(self, ramp=TopLevelVariables.rampdown):
         """Shuts down connection to HV and Pulse Gen"""
+        TopLevelVariables.repeat = False  # stops any data collection
+
         if isinstance(TopLevelVariables.gen, pulseGenerator): #If defined at all
             TopLevelVariables.gen.stop()  # switches off the pulser
             TopLevelVariables.gen = 0
@@ -158,4 +160,3 @@ class voltageFunctions:
             self.dataCollection.configure(state='disabled')
             self.picoscope.configure(state='normal')
             self.picoscope.configure(text='Setup Picoscope')
-
