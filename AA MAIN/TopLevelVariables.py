@@ -35,3 +35,12 @@ repeat = False
 threadFunc = 0
 
 HV0 = HV1 = HV2 = HV3 = MCP = 0
+
+canvas = 0
+fig = 0
+
+canvas1 = 0
+fig1 = 0
+
+x = 0
+y= 0

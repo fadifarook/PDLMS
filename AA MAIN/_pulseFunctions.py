@@ -48,8 +48,10 @@ class pulseFunctions:
             return None
 
         if not TopLevelVariables.repeat:
+            start = time.time()
             self.runPulse()
             self.get_data()
+            print(time.time() - start)
         else:
             wait = 1/int(self.repeated.get()[0:-2])
             TopLevelVariables.threadFunc = threading.Thread(target=self.threadRepeating, args=(wait,))

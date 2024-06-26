@@ -17,6 +17,8 @@ def massSpecProgram(identifier='test', xlsfilename='test.xls', waittime=60000, o
     # Create chandle and status ready for use
     status = {}
 
+    chARange = 7
+
     # print(chandle)
 
     if not opened:
@@ -26,17 +28,17 @@ def massSpecProgram(identifier='test', xlsfilename='test.xls', waittime=60000, o
         status["openunit"] = ps.ps6000OpenUnit(ctypes.byref(chandle), None)
         assert_pico_ok(status["openunit"])
 
-    # Set up channel A
-    # handle = chandle
-    # channel = PS6000_CHANNEL_A = 0
-    # enabled = 1
-    # coupling type = PS6000_DC = 1  , 50ohm is 2
-    # range = PS6000_2V = 7  , 10 for 20
-    # analogue offset = 0 V
-    # bandwidth limiter = PS6000_BW_FULL = 0
-    chARange = 7
-    status["setChA"] = ps.ps6000SetChannel(chandle, 0, 1, 2, chARange, 0, 0)
-    assert_pico_ok(status["setChA"])
+        # Set up channel A
+        # handle = chandle
+        # channel = PS6000_CHANNEL_A = 0
+        # enabled = 1
+        # coupling type = PS6000_DC = 1  , 50ohm is 2
+        # range = PS6000_2V = 7  , 10 for 20
+        # analogue offset = 0 V
+        # bandwidth limiter = PS6000_BW_FULL = 0
+        chARange = 7
+        status["setChA"] = ps.ps6000SetChannel(chandle, 0, 1, 2, chARange, 0, 0)
+        assert_pico_ok(status["setChA"])
 
     # # Set up channel B
     # # handle = chandle
@@ -50,16 +52,16 @@ def massSpecProgram(identifier='test', xlsfilename='test.xls', waittime=60000, o
     # status["setChB"] = ps.ps6000SetChannel(chandle, 1, 1, 1, chBRange, 0, 0)
     # assert_pico_ok(status["setChB"])
 
-    # Set up single trigger
-    # handle = chandle
-    # enabled = 1
-    # source = PS6000_CHANNEL_A = 0  --> 5 for aux in
-    # threshold = 64 ADC counts
-    # direction = PS6000_RISING = 2
-    # delay = 0 s
-    # auto Trigger = 1000 us   -- this waits 1000 MICROSECONDS (according to manual) if no trigger occurs and then continues. Try a larger number for laser trigger
-    status["trigger"] = ps.ps6000SetSimpleTrigger(chandle, 1, 5, 16000, 2, 0, waittime)  # switched to 1 minute  60000000, make sure the source is 5 for AUX-in
-    assert_pico_ok(status["trigger"])
+        # Set up single trigger
+        # handle = chandle
+        # enabled = 1
+        # source = PS6000_CHANNEL_A = 0  --> 5 for aux in
+        # threshold = 64 ADC counts
+        # direction = PS6000_RISING = 2
+        # delay = 0 s
+        # auto Trigger = 1000 us   -- this waits 1000 MICROSECONDS (according to manual) if no trigger occurs and then continues. Try a larger number for laser trigger
+        status["trigger"] = ps.ps6000SetSimpleTrigger(chandle, 1, 5, 16000, 2, 0, waittime)  # switched to 1 minute  60000000, make sure the source is 5 for AUX-in
+        assert_pico_ok(status["trigger"])
 
     # Set number of pre and post trigger samples to be collected
     preTriggerSamples = 250  # 2500

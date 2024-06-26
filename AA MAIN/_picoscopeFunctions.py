@@ -10,6 +10,10 @@ from API.MassSpec6000 import massSpecProgram
 from CAENpy.CAENDesktopHighVoltagePowerSupply import CAENDesktopHighVoltagePowerSupply, OneCAENChannel
 from API.PulseGenPy import pulseGenerator
 
+from matplotlib.ticker import AutoMinorLocator, MultipleLocator
+import matplotlib.backends.backend_tkagg as tkagg
+import matplotlib._pylab_helpers as pylhelp
+
 import TopLevelVariables
 
 
@@ -49,24 +53,22 @@ class picoscopeFunctions:
 
     def get_data(self):
         """Set up picoscope and Wait for a Trigger"""
-        global x, y
-
 
         if TopLevelVariables.voltageSupplyOpened or self.checkbox.get() or (not TopLevelVariables.picoOpened):
             if not self.checkbox.get():
                 try:
                     # run the picoscope software, get the time and intensity respectively
                     if TopLevelVariables.picoOpened:
-                        x, y, TopLevelVariables.handle = massSpecProgram(waittime=60000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)
+                        TopLevelVariables.x, TopLevelVariables.y, TopLevelVariables.handle = massSpecProgram(waittime=60000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)
                     
                     else:
-                        x, y, TopLevelVariables.handle = massSpecProgram(waittime=1000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)
+                        TopLevelVariables.x, TopLevelVariables.y, TopLevelVariables.handle = massSpecProgram(waittime=1000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)
                         
                     TopLevelVariables.picoOpened = True   # change the waittime when actually doing things, time in us
                     # x = 2
 
-                except:
-                    self.open_toplevel(message="Can't Find Picoscope")
+                except Exception as ex:
+                    self.open_toplevel(message=ex)
                     return None
 
             # If we are testing use the file provided else piscoscope
@@ -78,7 +80,7 @@ class picoscopeFunctions:
                 data = np.genfromtxt(TopLevelVariables.testFile, delimiter=',', skip_header=3, usecols=(0, 1), missing_values=neginfty, 
                                      filling_values=-2, dtype=float)
                 
-                x, y = np.rollaxis(data, axis=1)
+                TopLevelVariables.x, TopLevelVariables.y = np.rollaxis(data, axis=1)
 
 
             self.picoscope.configure(text='Picoscope Connected')
@@ -90,7 +92,7 @@ class picoscopeFunctions:
             self.button.configure(state='normal')
             self.slider.configure(state='normal')
 
-            self.update_window()  #removed since we split picoscope from software
+            self.update_window()
 
         else:
             # Error if voltage supply is not open
@@ -99,8 +101,9 @@ class picoscopeFunctions:
 
 
 
-    def update_window(self):
+    def update_window(self, calibrate = False):
         """ If Update graph is pressed (changed calibration) or when obtaining first result"""
+        
         mass_calibration = TopLevelVariables.pre_factor/np.sqrt(float(self.voltage1Input.get()))
         self.inputText.configure(text='Theoretical Value: {}'.format(round(mass_calibration, 4)))
 
@@ -118,39 +121,57 @@ class picoscopeFunctions:
         
 
         # Uncalibrated plotting
+        if TopLevelVariables.fig1 == 0:
+            TopLevelVariables.fig1 = plt.figure()
+        # TopLevelVariables.fig1, ax1 = plt.subplots()
+            TopLevelVariables.fig1.set_size_inches(11, 5)
+            TopLevelVariables.canvas1 = FigureCanvasTkAgg(TopLevelVariables.fig1, master=self.root)
+            TopLevelVariables.canvas1.get_tk_widget().place(relx=0.35, rely=0.025)
+        
         plt.switch_backend('agg')
-        fig1, ax1 = plt.subplots()
-        fig1.set_size_inches(11, 5)
-        ax1.plot(x, y, '#000000')
+        TopLevelVariables.fig1.clf()
+        ax1 = TopLevelVariables.fig1.add_subplot(1,1, 1)        
+        ax1.plot(TopLevelVariables.x, TopLevelVariables.y, '#000000')
         ax1.set_xlabel(r'time ($\mu s$)')
         ax1.set_ylabel('Intensity (mV)')
         ax1.set_title('Before Conversion')
-        canvas1 = FigureCanvasTkAgg(fig1, master=self.root)
-        canvas1.draw()
-        canvas1.get_tk_widget().place(relx=0.35, rely=0.025)
+        TopLevelVariables.canvas1.draw()
 
 
         # put the number into the slider
         self.slider.set(float(self.input.get()))
 
+
+
         # Calibrated Plotting
+        if TopLevelVariables.fig == 0:
+            TopLevelVariables.fig = plt.Figure()
+            TopLevelVariables.fig.set_size_inches(11,5)
+
+            TopLevelVariables.canvas = FigureCanvasTkAgg(TopLevelVariables.fig,master=self.frame2)
+            TopLevelVariables.canvas.get_tk_widget().place(relx=0, rely=0)
+            tkagg.NavigationToolbar2Tk(TopLevelVariables.canvas, self.navFrame)
+
         plt.switch_backend('agg')
-        fig, ax = plt.subplots()
-        fig.set_size_inches(11,5)
+        TopLevelVariables.fig.clf()
+        ax = TopLevelVariables.fig.add_subplot(1,1, 1)
+
         if TopLevelVariables.repeat:
             x_converted, y_converted = 0, 0
         else:
-            x_converted, y_converted = convert(x, y, self.slider.get())
+            x_converted, y_converted = convert(TopLevelVariables.x, TopLevelVariables.y, self.slider.get())
         ax.plot(x_converted, y_converted, color='#000000')
         ax.set_xlabel('Mass/charge')
         ax.set_ylabel('Counts (relative)')
         ax.set_title('After Conversion')
-        ax.set_xticks(np.arange(min(x_converted), max(x_converted)+1, 2.0))
+        # ax.set_xticks(np.arange(min(x_converted), max(x_converted)+1, max(x_converted)//40))
+        ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+        ax.xaxis.set_major_locator(MultipleLocator(5))
+        ax.tick_params(which='minor', length=4, color='r')
         ax.grid()
+        TopLevelVariables.canvas.draw()
         # fig.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
-        canvas = FigureCanvasTkAgg(fig,master=self.root)
-        canvas.draw()
-        canvas.get_tk_widget().place(relx=0.35, rely=0.52)
+        # tkagg.NavigationToolbar2Tk(TopLevelVariables.canvas,self.root)
         
         self.root.update()
 
@@ -159,21 +180,26 @@ class picoscopeFunctions:
         
     def update_surface(self,other):
         """Adjust calibrated plot while moving slider"""
-
+        
         plt.switch_backend('agg')
-        fig, ax = plt.subplots()
-        fig.set_size_inches(11,5)
-        x_converted, y_converted = convert(x, y, self.slider.get())
+        # fig, ax = plt.subplots()
+        # fig.set_size_inches(11,5)
+        TopLevelVariables.fig.clf()
+        ax = TopLevelVariables.fig.add_subplot(1,1,1)
+        x_converted, y_converted = convert(TopLevelVariables.x, TopLevelVariables.y, self.slider.get())
         ax.plot(x_converted, y_converted, color='#000000')
         ax.set_xlabel('Mass/charge')
         ax.set_ylabel('Counts (relative)')
         ax.set_title('After Conversion')
-        ax.set_xticks(np.arange(min(x_converted), max(x_converted)+1, 2.0))
+        ax.xaxis.set_minor_locator(AutoMinorLocator(5))
+        ax.xaxis.set_major_locator(MultipleLocator(5))
+        ax.tick_params(which='minor', length=4, color='r')
         ax.grid()
         # fig.subplots_adjust(left=0, right=1, bottom=0, top=1, wspace=0, hspace=0)
-        canvas = FigureCanvasTkAgg(fig,master=self.root)
-        canvas.draw()
-        canvas.get_tk_widget().place(relx=0.35, rely=0.52)
+        TopLevelVariables.canvas.draw()
+        # tkagg.NavigationToolbar2Tk(TopLevelVariables.canvas, self.root)
+
+
         self.input.delete(0, 100)
         self.input.insert(0,self.slider.get())
         self.root.update()
@@ -186,8 +212,7 @@ class picoscopeFunctions:
             self.saveInput.configure(placeholder_text='File Name Not Entered')
 
         else:
-            global x,y
-            x_converted, y_converted = convert(x, y, self.slider.get())
+            x_converted, y_converted = convert(TopLevelVariables.x, TopLevelVariables.y, self.slider.get())
 
             # TopLevelVariables.saveFolder = f'{TopLevelVariables.saveFolder}\\{time.strftime("%d%b%Y", time.gmtime())}'
 
@@ -197,7 +222,7 @@ class picoscopeFunctions:
             # Save all in a txt file
             with open(f'{TopLevelVariables.saveFolder}\\{self.saveInput.get()}.txt',"w") as f:
                 f.write('unconvertedTime, unconvertedIntensity, convertedMZ, convertedIntensity\n')
-                for (a, b, c, d) in zip(x, y, x_converted, y_converted):
+                for (a, b, c, d) in zip(TopLevelVariables.x, TopLevelVariables.y, x_converted, y_converted):
                     f.write("{0},{1},{2},{3}\n".format(a, b, c, d))
 
 
@@ -207,7 +232,7 @@ class picoscopeFunctions:
             fig, axs = plt.subplots(2)
             fig.suptitle(f'{self.saveInput.get()}')
 
-            axs[0].plot(x, y, '#000000')
+            axs[0].plot(TopLevelVariables.x, TopLevelVariables.y, '#000000')
             axs[0].set_xlabel(r'time ($\mu s$)')
             axs[0].set_ylabel('Intensity (mV)')
             axs[0].set_title('Before Conversion')
@@ -216,7 +241,9 @@ class picoscopeFunctions:
             axs[1].set_xlabel('Mass/charge')
             axs[1].set_ylabel('Counts (relative)')
             axs[1].set_title('After Conversion')
-            axs[1].set_xticks(np.arange(min(x_converted), max(x_converted)+1, 2.0))
+            # axs[1].set_xticks(np.arange(min(x_converted), max(x_converted)+1, max(x_converted)//40))
+            axs[1].xaxis.set_minor_locator(AutoMinorLocator(10))
+            axs[1].tick_params(which='minor', length=4, color='r')
             axs[1].grid()
 
             fig.tight_layout(pad=1.0)

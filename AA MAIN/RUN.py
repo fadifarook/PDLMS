@@ -13,6 +13,7 @@ import TopLevelVariables
 from _pulseFunctions import pulseFunctions
 from _voltageFunctions import voltageFunctions
 from _picoscopeFunctions import picoscopeFunctions
+from _calibrationFunctions import calibrationFunctions
 
 
 
@@ -39,7 +40,7 @@ class ToplevelWindow(ctk.CTkToplevel):
         self.button.pack(side=ctk.RIGHT, pady=2, padx=2)
 
 
-class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
+class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions, calibrationFunctions):
     """Main GUI"""
     def __init__(self):
         
@@ -60,6 +61,21 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
         self.root.update()
 
 
+        """Creating Tabs"""
+        tabview = ctk.CTkTabview(master = self.root,
+                                height= self.root.winfo_height()*0.5,
+                                width = self.root.winfo_width()*0.32,
+                                fg_color="transparent",
+                                border_color="#000000",
+                                border_width=4)
+        tabview.place(relx=0.002, rely=0.01)
+
+        mainTab = tabview.add("Main")  # add tab at the end
+        calibrationTab = tabview.add("Calibration")  # add tab at the end
+        tabview.set("Main") # set currently visible tab
+
+
+
         """Most of below is GUI definitions"""
 
         # Frame for the Uncalibrated graph
@@ -72,20 +88,20 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
 
         # Frame for calibrated Graph
         self.frame2 = ctk.CTkFrame(master=self.root,
-                                  height= self.root.winfo_height()*0.3,
-                                  width = self.root.winfo_width()*0.45,
+                                  height= 500,
+                                  width = 1125,
                                   fg_color="#020202")
         self.frame2.place(relx=0.35, rely=0.52)
 
 
-        # Frames for Voltage and Pulse Values (to look nice)
-        self.frameTop = ctk.CTkFrame(master=self.root,
-                                  height= self.root.winfo_height()*0.5,
-                                  width = self.root.winfo_width()*0.32,
-                                  fg_color="transparent",
-                                  border_color="#000000",
-                                  border_width=4)
-        self.frameTop.place(relx=0.002, rely=0.01)
+        # # Frames for Voltage and Pulse Values (to look nice)
+        # self.frameTop = ctk.CTkFrame(master=self.root,
+        #                           height= self.root.winfo_height()*0.5,
+        #                           width = self.root.winfo_width()*0.32,
+        #                           fg_color="transparent",
+        #                           border_color="#000000",
+        #                           border_width=4)
+        # self.frameTop.place(relx=0.002, rely=0.01)
 
         # Frame for Slider and Save Stuff
         self.frameBot = ctk.CTkFrame(master=self.root,
@@ -97,147 +113,156 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
         self.frameBot.place(relx=0.002, rely=0.54)
 
 
+        self.navFrame = ctk.CTkFrame(master=self.root,
+                                  height= 50,
+                                  width = 200,
+                                  fg_color="transparent",
+                                  border_color="#000000",
+                                  border_width=4)        
+        self.navFrame.place(relx=0.01,rely=0.92)
+
+
 
         """Voltage Labels and Boxes"""
         # Cone 1 voltage
-        self.voltage1Text = ctk.CTkLabel(master=self.root,
+        self.voltage1Text = ctk.CTkLabel(master=mainTab,
                                           width=100,
                                           height=25,
                                           text='Cone 1(V)',
                                           fg_color='transparent')
-        self.voltage1Text.place(relx=0.01, rely=0.02)
+        self.voltage1Text.place(relx=0.01/0.32, rely=0.02/0.5)
 
-        self.voltage1Input =  ctk.CTkEntry(master=self.root,
+        self.voltage1Input =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=100,
                                    height=50,
                                    fg_color="#515151")
         self.voltage1Input.insert(0,str(5))
-        self.voltage1Input.place(relx=0.01,rely=0.05)
+        self.voltage1Input.place(relx=0.010/0.32,rely=0.05/0.5)
 
         #Cone 2 Voltage
-        self.voltage2Text = ctk.CTkLabel(master=self.root,
+        self.voltage2Text = ctk.CTkLabel(master=mainTab,
                                           width=100,
                                           height=25,
                                           text = 'Lens 1 (V)',
                                           fg_color='transparent')
-        self.voltage2Text.place(relx=0.08, rely=0.02)
+        self.voltage2Text.place(relx=0.08/0.32, rely=0.02/0.5)
 
-        self.voltage2Input =  ctk.CTkEntry(master=self.root,
+        self.voltage2Input =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=100,
                                    height=50,
                                    fg_color="#515151")
         self.voltage2Input.insert(0,str(5))
-        self.voltage2Input.place(relx=0.08,rely=0.05)
+        self.voltage2Input.place(relx=0.08/0.32,rely=0.05/0.5)
 
         #3
-        self.voltage3Text = ctk.CTkLabel(master=self.root,
+        self.voltage3Text = ctk.CTkLabel(master=mainTab,
                                           width=100,
                                           height=25,
                                           text='PDL High Voltage (V)',
                                           fg_color='transparent')
-        self.voltage3Text.place(relx=0.15, rely=0.02)
+        self.voltage3Text.place(relx=0.15/0.32, rely=0.02/0.5)
 
-        self.voltage3Input =  ctk.CTkEntry(master=self.root,
+        self.voltage3Input =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=100,
                                    height=50,
                                    fg_color="#515151")
         self.voltage3Input.insert(0,str(5))
-        self.voltage3Input.place(relx=0.15,rely=0.05)
+        self.voltage3Input.place(relx=0.15/0.32,rely=0.05/0.5)
 
         #4
-        self.voltage4Text = ctk.CTkLabel(master=self.root,
+        self.voltage4Text = ctk.CTkLabel(master=mainTab,
                                           width=100,
                                           height=25,
                                           text='Spec HV (V)',
                                           fg_color='transparent')
-        self.voltage4Text.place(relx=0.22, rely=0.02)
+        self.voltage4Text.place(relx=0.22/0.32, rely=0.02/0.5)
 
-        self.voltage4Input =  ctk.CTkEntry(master=self.root,
+        self.voltage4Input =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=100,
                                    height=50,
                                    fg_color="#515151")
         self.voltage4Input.insert(0,str(5))
-        self.voltage4Input.place(relx=0.22,rely=0.05)
+        self.voltage4Input.place(relx=0.22/0.32,rely=0.05/0.5)
 
 
         #MCP Voltage
-        self.MCPText = ctk.CTkLabel(master=self.root,
+        self.MCPText = ctk.CTkLabel(master=mainTab,
                                           width=100,
                                           height=25,
                                           text='MCP Negative (V)',
                                           fg_color='transparent')
-        self.MCPText.place(relx=0.01, rely=0.11)
+        self.MCPText.place(relx=0.01/0.32, rely=0.11/0.5)
 
-        self.MCPInput =  ctk.CTkEntry(master=self.root,
+        self.MCPInput =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=100,
                                    height=50,
                                    fg_color="#515151")
         self.MCPInput.insert(0,str(5))
-        self.MCPInput.place(relx=0.01,rely=0.14)
+        self.MCPInput.place(relx=0.01/0.32,rely=0.14/0.5)
 
 
         # From file or not checkbox
-        self.checkbox = ctk.CTkCheckBox(master=self.root, 
+        self.checkbox = ctk.CTkCheckBox(master=mainTab, 
                                         text="From File", 
                                         command=None)
-        self.checkbox.place(relx=0.25, rely = 0.12)
+        self.checkbox.place(relx=0.25/0.32, rely = 0.12/0.5)
 
         # # Pulse Repeated or not
-        # self.repeated = ctk.CTkCheckBox(master=self.root, 
+        # self.repeated = ctk.CTkCheckBox(master=mainTab, 
         #                                 text="2 Hz pulse", 
         #                                 command=self.repeat)
         # self.repeated.place(relx=0.25, rely = 0.15)
 
-        self.repeated = ctk.CTkComboBox(master=self.root,
+        self.repeated = ctk.CTkComboBox(master=mainTab,
                                         values=["Single Shot", "1Hz", "2Hz",
                                                 "3Hz", "5Hz", "10Hz"],
                                         command=self.repeat)
-        self.repeated.place(relx=0.24, rely = 0.15)
+        self.repeated.place(relx=0.24/0.32, rely = 0.15/0.5)
 
         '''Pulse Labels and Boxes'''
         # Pulse Width
-        self.pulseWidthText = ctk.CTkLabel(master=self.root,
+        self.pulseWidthText = ctk.CTkLabel(master=mainTab,
                                           width=150,
                                           height=25,
                                           text='Pulse Width (ms)',
                                           fg_color='transparent')
-        self.pulseWidthText.place(relx=0.01, rely=0.2)
+        self.pulseWidthText.place(relx=0.01/0.32, rely=0.2/0.5)
 
-        self.pulseWidthInput =  ctk.CTkEntry(master=self.root,
+        self.pulseWidthInput =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=150,
                                    height=50,
                                    fg_color="#515151")
         self.pulseWidthInput.insert(0,str(0.003))
-        self.pulseWidthInput.place(relx=0.01,rely=0.23)
+        self.pulseWidthInput.place(relx=0.01/0.32,rely=0.23/0.5)
 
         # Pulse Delay
-        self.pulseDelayText = ctk.CTkLabel(master=self.root,
+        self.pulseDelayText = ctk.CTkLabel(master=mainTab,
                                           width=150,
                                           height=25,
                                           text='Pulse Delay (ms)',
                                           fg_color='transparent')
-        self.pulseDelayText.place(relx=0.12, rely=0.2)
+        self.pulseDelayText.place(relx=0.12/0.32, rely=0.2/0.5)
 
-        self.pulseDelayInput =  ctk.CTkEntry(master=self.root,
+        self.pulseDelayInput =  ctk.CTkEntry(master=mainTab,
                                    placeholder_text=100,
                                    justify='center',
                                    width=150,
                                    height=50,
                                    fg_color="#515151")
         self.pulseDelayInput.insert(0,str(15))
-        self.pulseDelayInput.place(relx=0.12,rely=0.23)
+        self.pulseDelayInput.place(relx=0.12/0.32,rely=0.23/0.5)
 
 
 
@@ -278,39 +303,39 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
         """Buttons"""
 
         #Activate the HV
-        self.activate = ctk.CTkButton(master = self.root,
+        self.activate = ctk.CTkButton(master = mainTab,
                                text="Set Up Voltages",
                                width=150,
                                height=50,
                                command=self.setupRest)  # updates with the button
-        self.activate.place(relx=0.04,rely=0.32)
+        self.activate.place(relx=0.02/0.32,rely=0.32/0.5)
 
         # Pulse Button
-        self.pulseButton = ctk.CTkButton(master = self.root,
+        self.pulseButton = ctk.CTkButton(master = mainTab,
                                text="Start Pulse",
                                width=150,
                                height=50,
                                command=self.runPulse,
                                state='disabled')  # updates with the button
-        self.pulseButton.place(relx=0.04,rely=0.4) 
+        self.pulseButton.place(relx=0.02/0.32,rely=0.4/0.5) 
 
         # Get Data from Picoscope
-        self.picoscope = ctk.CTkButton(master = self.root,
+        self.picoscope = ctk.CTkButton(master = mainTab,
                                text="Setup Picoscope",
                                width=150,
                                height=50,
                                command=self.get_data)  # updates with the button
-        self.picoscope.place(relx=0.16,rely=0.32)
+        self.picoscope.place(relx=0.12/0.32,rely=0.32/0.5)
 
         # Pulse and GetData from Picoscope
-        self.dataCollection = ctk.CTkButton(master = self.root,
+        self.dataCollection = ctk.CTkButton(master = mainTab,
                                text="Get Data",
                                width=150,
                                height=50,
                                command=self.data_collection,
                                state='disabled',
                                fg_color='green')  # updates with the button
-        self.dataCollection.place(relx=0.16,rely=0.4)
+        self.dataCollection.place(relx=0.12/0.32,rely=0.4/0.5)
 
         # Update Graph
         self.button = ctk.CTkButton(master = self.root,
@@ -343,16 +368,16 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
 
 
         # Setup Pulse Button
-        self.setupPulseButton = ctk.CTkButton(master=self.root,
+        self.setupPulseButton = ctk.CTkButton(master=mainTab,
                                         text = 'Setup Pulse Gen',
                                         width = 150,
                                         height = 50,
                                         command=self.setupPulse)
-        self.setupPulseButton.place(relx=0.22, rely=0.23)
+        self.setupPulseButton.place(relx=0.22/0.32, rely=0.23/0.5)
 
 
         # # # Stop Repeat
-        # self.stopRepeatButton = ctk.CTkButton(master=self.root,
+        # self.stopRepeatButton = ctk.CTkButton(master=mainTab,
         #                                 text = 'Stop repeat',
         #                                 width = 80,
         #                                 height = 25,
@@ -415,19 +440,117 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
 
 
         # Pulse monitoring
-        self.LabelWidth = ctk.CTkTextbox(master=self.root,
+        self.LabelWidth = ctk.CTkTextbox(master=mainTab,
                                           width=150,
                                           height=10,
                                           fg_color='transparent')
         self.LabelWidth.insert(0.0, f'Pulse Width: ')
-        self.LabelWidth.place(relx=0.13, rely=0.47)
+        self.LabelWidth.place(relx=0.13/0.32, rely=0.47/0.5)
 
-        self.LabelDelay = ctk.CTkTextbox(master=self.root,
+        self.LabelDelay = ctk.CTkTextbox(master=mainTab,
                                           width=150,
                                           height=10,
                                           fg_color='transparent')
         self.LabelDelay.insert(0.0, f'Pulse Delay: ')
-        self.LabelDelay.place(relx=0.2, rely=0.47)
+        self.LabelDelay.place(relx=0.2/0.32, rely=0.47/0.5)
+
+
+
+
+        """All calibration Tools"""
+        # Status of Calibration
+        self.calibrationText = ctk.CTkLabel(master=calibrationTab,
+                                          width=150,
+                                          height=25,
+                                          text='Calibrated Voltage: NA',
+                                          fg_color='transparent')
+        self.calibrationText.place(relx=0.21/0.32,rely=0.35/0.5)
+
+        # Calibration Button
+        self.calibrationButton = ctk.CTkButton(master = calibrationTab,
+                               text="Start Calibration",
+                               width=150,
+                               height=50,
+                               command=self.threadCalibrationFunction,
+                               fg_color='#8b0000')
+        self.calibrationButton.place(relx=0.22/0.32,rely=0.4/0.5)
+
+
+        # Start Step Stop
+        self.startCalibrationLabel = ctk.CTkLabel(master=calibrationTab,
+                                          width=100,
+                                          height=25,
+                                          text='Start Voltage (V)',
+                                          fg_color='transparent')
+        self.startCalibrationLabel.place(relx=0.01/0.32, rely=0.02/0.5)
+
+        self.startCalibrationInput =  ctk.CTkEntry(master=calibrationTab,
+                                   placeholder_text=100,
+                                   justify='center',
+                                   width=100,
+                                   height=50,
+                                   fg_color="#515151")
+        self.startCalibrationInput.insert(0,str(5))
+        self.startCalibrationInput.place(relx=0.010/0.32,rely=0.05/0.5)
+
+        self.stepCalibrationLabel = ctk.CTkLabel(master=calibrationTab,
+                                          width=100,
+                                          height=25,
+                                          text='Step Voltage (V)',
+                                          fg_color='transparent')
+        self.stepCalibrationLabel.place(relx=0.08/0.32, rely=0.02/0.5)
+
+        self.stepCalibrationInput =  ctk.CTkEntry(master=calibrationTab,
+                                   placeholder_text=100,
+                                   justify='center',
+                                   width=100,
+                                   height=50,
+                                   fg_color="#515151")
+        self.stepCalibrationInput.insert(0,str(5))
+        self.stepCalibrationInput.place(relx=0.08/0.32,rely=0.05/0.5)
+
+        self.stopCalibrationLabel = ctk.CTkLabel(master=calibrationTab,
+                                          width=100,
+                                          height=25,
+                                          text='Stop Voltage (V)',
+                                          fg_color='transparent')
+        self.stopCalibrationLabel.place(relx=0.15/0.32, rely=0.02/0.5)
+
+        self.stopCalibrationInput =  ctk.CTkEntry(master=calibrationTab,
+                                   placeholder_text=100,
+                                   justify='center',
+                                   width=100,
+                                   height=50,
+                                   fg_color="#515151")
+        self.stopCalibrationInput.insert(0,str(30))
+        self.stopCalibrationInput.place(relx=0.15/0.32,rely=0.05/0.5)
+
+        
+        self.collectionNumberLabel = ctk.CTkLabel(master=calibrationTab,
+                                          width=100,
+                                          height=25,
+                                          text='Number of Collection',
+                                          fg_color='transparent')
+        self.collectionNumberLabel.place(relx=0.22/0.32, rely=0.02/0.5)
+
+        self.collectionNumberInput =  ctk.CTkEntry(master=calibrationTab,
+                                   placeholder_text=100,
+                                   justify='center',
+                                   width=100,
+                                   height=50,
+                                   fg_color="#515151")
+        self.collectionNumberInput.insert(0,str(50))
+        self.collectionNumberInput.place(relx=0.22/0.32,rely=0.05/0.5)
+
+        self.progressbar = ctk.CTkProgressBar(master=calibrationTab, 
+                                              orientation="horizontal",
+                                              width=200,
+                                              height=10,
+                                              progress_color='green')
+        self.progressbar.place(relx=0.2,rely=0.85)
+        self.progressbar.set(0)
+
+
         
 
 
@@ -442,7 +565,7 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions):
         """When closing the gui, it shows error if not killed"""
         # global TopLevelVariables.gen
         if isinstance(TopLevelVariables.caen, CAENDesktopHighVoltagePowerSupply) and TopLevelVariables.block:
-            self.open_toplevel(message="Remember to Kill the Voltage Supply")
+            self.open_toplevel(message="Remember to Kill the Voltage Supply and the Negative Voltage Supply")
             TopLevelVariables.block = False
         # time.sleep(3)
         else:

@@ -63,7 +63,7 @@ class voltageFunctions:
                                 v2=float(self.voltage3Input.get()), v3=float(self.voltage4Input.get()),
                                 v4=float(self.MCPInput.get()))
         
-        self.activate.configure(text='Setup Voltages with New Values')
+        self.activate.configure(text='Setup Voltages Again')
 
 
 
@@ -112,6 +112,8 @@ class voltageFunctions:
             status = int(TopLevelVariables.HV1.get(PAR='STAT')[:-1])
             if status == 4:
                 self.open_toplevel(message="Caution: Overvoltage")
+
+            self.saveButton.configure(text='Save')
         
         self.root.after(1000, self.looping)  # updates in time
 
