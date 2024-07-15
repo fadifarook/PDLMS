@@ -16,3 +16,4 @@ RUN contains the GUI code and the other files contain all the relevant functions
 3. pyvisa: https://pyvisa.readthedocs.io/en/latest/  -- Pulse Generator Commands
 4. picosdk: https://github.com/picotech/picosdk-python-wrappers  -- Picoscope Controller
 
+![GUI](https://github.com/user-attachments/assets/326c447e-fae4-4763-bc3e-7b1ae1cd6cd9)
