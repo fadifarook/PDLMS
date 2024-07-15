@@ -49,7 +49,8 @@ class pulseFunctions:
 
         if not TopLevelVariables.repeat:
             start = time.time()
-            self.runPulse()
+            if not self.checkbox.get():
+                self.runPulse()
             self.get_data()
             print(time.time() - start)
         else:

@@ -31,7 +31,7 @@ def wait_until(voltageSource, voltageReference, timeout = 60, period=0.25):
 
 class calibrationFunctions:
 
-    def averageOneVoltage(self, numOfData = 50):
+    def averageOneVoltage(self, numOfData = 50, specifiedVoltage=2):
         """Take numOfData measurements at a specified voltage and return averaged maximum of the data"""
         
         i = 0
@@ -39,11 +39,16 @@ class calibrationFunctions:
         while i < numOfData:
             self.runPulse()  # laser
             TopLevelVariables.x, TopLevelVariables.y, TopLevelVariables.handle = massSpecProgram(waittime=60000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)  # get data
+            # print(TopLevelVariables.x, TopLevelVariables.y)
+            try:
+                self.savecalibration(voltageValue=specifiedVoltage, number=i, x_array=TopLevelVariables.x, y_array=TopLevelVariables.y)
+            except:
+                print('Failed')
 
             if i ==0:
-                addedY = TopLevelVariables.y
+                addedY = np.array(TopLevelVariables.y)
             else:
-                addedY += TopLevelVariables.y
+                addedY += np.array(TopLevelVariables.y)
 
             if i == numOfData//2:
                 self.update_window()
@@ -55,6 +60,7 @@ class calibrationFunctions:
             i += 1
 
         averagedY = np.array(addedY)/numOfData
+        self.savecalibration(specifiedVoltage, number='avg', x_array=TopLevelVariables.x ,y_array=averagedY)
         return np.min(averagedY)  # minimum since its an inverted thing
 
     def calibrateVoltage(self, voltageList, averageMaxList):
@@ -132,7 +138,7 @@ class calibrationFunctions:
                 return None
             
             start =time.time()
-            currentMax = self.averageOneVoltage(numOfData=numberOfData)
+            currentMax = self.averageOneVoltage(numOfData=numberOfData, specifiedVoltage=currentVoltage)
             print(time.time() - start)
             # print(currentMax)
             
@@ -156,3 +162,23 @@ class calibrationFunctions:
         TopLevelVariables.threadFunc = threading.Thread(target=self.calibrationFunction)
         TopLevelVariables.threadFunc.start()
         # self.calibrationFunction()
+
+    
+    def savecalibration(self, voltageValue, number, x_array=TopLevelVariables.x, y_array=TopLevelVariables.y):
+        calibrationFolder = f'{TopLevelVariables.saveFolder}\\Calibration'
+
+        # print(x_array, y_array)
+
+        if not os.path.exists(calibrationFolder):
+            os.mkdir(calibrationFolder)
+        
+        calibrationFolder = f'{calibrationFolder}\\{int(voltageValue)}'
+
+        if not os.path.exists(calibrationFolder):
+            os.mkdir(calibrationFolder)
+
+        # Save all in a txt file
+        with open(f'{calibrationFolder}\\{number}.txt',"w") as f:
+            f.write('unconvertedTime, unconvertedIntensity\n')
+            for (a, b) in zip(x_array, y_array):
+                f.write("{0},{1}\n".format(a, b))
