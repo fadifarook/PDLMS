@@ -539,7 +539,7 @@ class ctkApp(pulseFunctions, voltageFunctions, picoscopeFunctions, calibrationFu
                                    width=100,
                                    height=50,
                                    fg_color="#515151")
-        self.collectionNumberInput.insert(0,str(50))
+        self.collectionNumberInput.insert(0,str(10))
         self.collectionNumberInput.place(relx=0.22/0.32,rely=0.05/0.5)
 
         self.progressbar = ctk.CTkProgressBar(master=calibrationTab, 

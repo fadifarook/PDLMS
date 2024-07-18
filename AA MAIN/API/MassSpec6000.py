@@ -33,10 +33,10 @@ def massSpecProgram(identifier='test', xlsfilename='test.xls', waittime=60000, o
         # channel = PS6000_CHANNEL_A = 0
         # enabled = 1
         # coupling type = PS6000_DC = 1  , 50ohm is 2
-        # range = PS6000_2V = 7  , 10 for 20
+        # range = PS6000_2V = 7  , 10 for 20, 8 for 5
         # analogue offset = 0 V
         # bandwidth limiter = PS6000_BW_FULL = 0
-        chARange = 7
+        chARange = 8
         status["setChA"] = ps.ps6000SetChannel(chandle, 0, 1, 2, chARange, 0, 0)
         assert_pico_ok(status["setChA"])
 
