@@ -1,4 +1,5 @@
 import time
+import numpy as np
 
 """Top Level Variables to be Changed"""
 rampup = 50  # Voltage for ramping Up
@@ -18,7 +19,9 @@ pre_factor = 69.18639678433904  # 52.82749284  # This is factor from one set of 
 
 
 
-# These are used to indicate moments in the gui. Don't change unless you know what you are doing.
+"""These are used to indicate moments in the gui. Don't change unless you know what you are doing."""
+
+# State of the program. Used to check if things have been setup, and used as the relevant object when setup.
 first_time = 1
 voltageSupplyOpened = False
 MCPOpened = False
@@ -27,18 +30,22 @@ gen = 0
 caen = 0
 MCPcaen = 0
 vacuumReady = False
+HV0 = HV1 = HV2 = HV3 = MCP = 0
+
 
 handle = None
 block = True
 
+# Old code not in use
 repeat = False
 threadFunc = 0
 
-HV0 = HV1 = HV2 = HV3 = MCP = 0
-
+# Plotting variables
+# For calibrated graph
 canvas = 0
 fig = 0
 
+# For uncalibrated graph
 canvas1 = 0
 fig1 = 0
 

@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import time
 import os
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from API.MassSpec6000 import massSpecProgram
@@ -25,7 +27,7 @@ infty = "\u221E"
 neginfty = "-\u221E"
 
 def convert(times, volt, mass_calibration):
-    """Converts Data from time-intensity mass charge values"""
+    """Helper Function: Converts Data from time-intensity mass charge values"""
 
     times_us = np.asarray(times, dtype='float64')
     nparr = np.asarray(volt, dtype='float64')
@@ -34,10 +36,10 @@ def convert(times, volt, mass_calibration):
     mVs = np.asarray(nparr, dtype='float64')
     # mVs = mVs * -1
 
-    mVs = mVs * -1    # this CAUSES ISSUES FOR SOME REASON?
+    mVs = mVs * -1
     mVs = mVs[times_us >=0]  # take the positive times
     times_us = times_us[times_us >= 0]
-    mzs = (times_us/mass_calibration)**2  # conversion from book
+    mzs = (times_us/mass_calibration)**2  # theoretical conversion from book
     cnts_temp = (mVs)
     relMax = max(cnts_temp)
     try:
@@ -51,8 +53,9 @@ def convert(times, volt, mass_calibration):
 class picoscopeFunctions:
     
 
-    def get_data(self):
+    def setup_picoscope(self):
         """Set up picoscope and Wait for a Trigger"""
+
 
         if TopLevelVariables.voltageSupplyOpened or self.checkbox.get() or (not TopLevelVariables.picoOpened):
             if not self.checkbox.get():
@@ -62,6 +65,7 @@ class picoscopeFunctions:
                         TopLevelVariables.x, TopLevelVariables.y, TopLevelVariables.handle = massSpecProgram(waittime=60000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)
                     
                     else:
+                        # waittime=1000 means the tigger is disabled and it just runs. This is done when opening the first time
                         TopLevelVariables.x, TopLevelVariables.y, TopLevelVariables.handle = massSpecProgram(waittime=1000, opened=TopLevelVariables.picoOpened, chandle=TopLevelVariables.handle)
                         
                     TopLevelVariables.picoOpened = True   # change the waittime when actually doing things, time in us
@@ -71,7 +75,7 @@ class picoscopeFunctions:
                     self.open_toplevel(message=ex)
                     return None
 
-            # If we are testing use the file provided else piscoscope
+            # If we are just displaying data from a file
             else:
                 TopLevelVariables.testFile = ctk.filedialog.askopenfilename()
 
@@ -102,10 +106,12 @@ class picoscopeFunctions:
 
 
     def update_window(self, calibrate = False):
-        """ If Update graph is pressed (changed calibration) or when obtaining first result"""
+        """ If Update graph is pressed (changed calibration) or when obtaining first result, display all graphs
+        
+        fig, ax is the calibrated graph. fig1, ax1 is the uncalibrated"""
         
         mass_calibration = TopLevelVariables.pre_factor/np.sqrt(float(self.voltage1Input.get()))
-        self.inputText.configure(text='Theoretical Value: {}'.format(round(mass_calibration, 4)))
+        self.theoreticalText.configure(text='Theoretical Value: {}'.format(round(mass_calibration, 4)))
 
         if TopLevelVariables.first_time:
             # Get the calibration factor
@@ -119,8 +125,9 @@ class picoscopeFunctions:
         else:
             mass_calibration = float(self.input.get())
         
+        self.currentCalibrationText.configure(text='Current Value: {}'.format(round(mass_calibration, 4)))
 
-        # Uncalibrated plotting
+        # Uncalibrated data plotting
         if TopLevelVariables.fig1 == 0:
             TopLevelVariables.fig1 = plt.figure()
         # TopLevelVariables.fig1, ax1 = plt.subplots()
@@ -129,7 +136,7 @@ class picoscopeFunctions:
             TopLevelVariables.canvas1.get_tk_widget().place(relx=0.35, rely=0.025)
         
         plt.switch_backend('agg')
-        TopLevelVariables.fig1.clf()
+        TopLevelVariables.fig1.clf()  # clear figure
         ax1 = TopLevelVariables.fig1.add_subplot(1,1, 1)        
         ax1.plot(TopLevelVariables.x, TopLevelVariables.y, '#000000')
         ax1.set_xlabel(r'time ($\mu s$)')
@@ -143,7 +150,7 @@ class picoscopeFunctions:
 
 
 
-        # Calibrated Plotting
+        # Calibrated data Plotting
         if TopLevelVariables.fig == 0:
             TopLevelVariables.fig = plt.Figure()
             TopLevelVariables.fig.set_size_inches(11,5)
@@ -153,7 +160,7 @@ class picoscopeFunctions:
             tkagg.NavigationToolbar2Tk(TopLevelVariables.canvas, self.navFrame)
 
         plt.switch_backend('agg')
-        TopLevelVariables.fig.clf()
+        TopLevelVariables.fig.clf()  # clear figure
         ax = TopLevelVariables.fig.add_subplot(1,1, 1)
 
         if TopLevelVariables.repeat:
@@ -181,12 +188,14 @@ class picoscopeFunctions:
     def update_surface(self,other):
         """Adjust calibrated plot while moving slider"""
         
+        current_value = self.slider.get()
+
         plt.switch_backend('agg')
         # fig, ax = plt.subplots()
         # fig.set_size_inches(11,5)
         TopLevelVariables.fig.clf()
         ax = TopLevelVariables.fig.add_subplot(1,1,1)
-        x_converted, y_converted = convert(TopLevelVariables.x, TopLevelVariables.y, self.slider.get())
+        x_converted, y_converted = convert(TopLevelVariables.x, TopLevelVariables.y, current_value)
         ax.plot(x_converted, y_converted, color='#000000')
         ax.set_xlabel('Mass/charge')
         ax.set_ylabel('Counts (relative)')
@@ -199,6 +208,8 @@ class picoscopeFunctions:
         TopLevelVariables.canvas.draw()
         # tkagg.NavigationToolbar2Tk(TopLevelVariables.canvas, self.root)
 
+
+        self.currentCalibrationText.configure(text='Current Value: {}'.format(round(current_value, 4)))
 
         self.input.delete(0, 100)
         self.input.insert(0,self.slider.get())
@@ -217,7 +228,7 @@ class picoscopeFunctions:
             # TopLevelVariables.saveFolder = f'{TopLevelVariables.saveFolder}\\{time.strftime("%d%b%Y", time.gmtime())}'
 
             if not os.path.exists(TopLevelVariables.saveFolder):
-                os.mkdir(TopLevelVariables.saveFolder)
+                os.mkdir(TopLevelVariables.saveFolder)  # makes savefolder
 
             # Save all in a txt file
             with open(f'{TopLevelVariables.saveFolder}\\{self.saveInput.get()}.txt',"w") as f:
@@ -226,7 +237,7 @@ class picoscopeFunctions:
                     f.write("{0},{1},{2},{3}\n".format(a, b, c, d))
 
 
-            # Save Plots as well
+            # Save Plots as well in png
 
             plt.switch_backend('agg')
             fig, axs = plt.subplots(2)

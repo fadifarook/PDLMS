@@ -3,6 +3,8 @@ import sys
 import numpy as np
 import pandas as pd
 import time
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from API.MassSpec6000 import massSpecProgram, closePicoscope
@@ -15,10 +17,12 @@ import TopLevelVariables
 
 
 class voltageFunctions:
+    """Contains all the functions associated with the voltage supply"""
 
     def setupRest(self):
         """Connects to the voltage Supply"""
 
+        # Message at the start to remind user to check the vacuum
         if not TopLevelVariables.vacuumReady:
             self.open_toplevel(message='Make sure the Vacuum is Working', buttonText='Done')
             TopLevelVariables.vacuumReady= True
@@ -42,7 +46,7 @@ class voltageFunctions:
 
         except:
             # Error Message
-            self.open_toplevel(message="Can't find HV Supply")
+            self.open_toplevel(message="Can't find HV Supply. Check COM Port")
             return None
 
 
@@ -56,14 +60,15 @@ class voltageFunctions:
         
         except:
             # Error Message
-            self.open_toplevel(message="Can't find MCP HV Supply")
+            self.open_toplevel(message="Can't find MCP HV Supply. Check COM Port")
             return None
         
+        # Sends the voltages from the inputs into the device
         self.setVoltage(v0=float(self.voltage1Input.get()), v1=float(self.voltage2Input.get()),
                                 v2=float(self.voltage3Input.get()), v3=float(self.voltage4Input.get()),
                                 v4=float(self.MCPInput.get()))
         
-        self.activate.configure(text='Setup Voltages Again')
+        self.activateHV.configure(text='Setup Voltages Again')
 
 
 
@@ -93,7 +98,9 @@ class voltageFunctions:
 
 
     def looping(self):
-        """Loop for monitoring the voltage and currents of each channel"""
+        """Loop for monitoring the voltage and currents of each channel
+        
+        Every second, it receieves data from the voltage supplies and displays on the gui"""
 
         if TopLevelVariables.voltageSupplyOpened:
             for label, source in {self.Label0:TopLevelVariables.HV0, self.Label1:TopLevelVariables.HV1, self.Label2:TopLevelVariables.HV2, self.Label3:TopLevelVariables.HV3}.items():
@@ -108,7 +115,7 @@ class voltageFunctions:
             # print(int(TopLevelVariables.HV1.get(PAR='STAT')[:-1]))
             
 
-            # Error if OverCurrent
+            # Error if OverVoltage
             status = int(TopLevelVariables.HV1.get(PAR='STAT')[:-1])
             if status == 4:
                 self.open_toplevel(message="Caution: Overvoltage")
@@ -120,7 +127,7 @@ class voltageFunctions:
 
 
     def kill(self, ramp=TopLevelVariables.rampdown):
-        """Shuts down connection to HV and Pulse Gen"""
+        """Shuts down connection to HV, MCP, Picoscope and Pulse Gen"""
         TopLevelVariables.repeat = False  # stops any data collection
 
         if isinstance(TopLevelVariables.gen, pulseGenerator): #If defined at all
