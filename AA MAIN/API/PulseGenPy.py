@@ -54,7 +54,7 @@ class pulseGenerator:
         self.pulseGen.write(f":PULSE1:DELAY {self.delay}")
 
         self.pulseGen.write(":PULSE2:STATE ON")  # uses channel B=2 : Laser
-        self.pulseGen.write(f":PULSE2:WIDT {self.laser_width}")
+        self.pulseGen.write(f":PULSE2:WIDT {self.width}")
         self.pulseGen.write(f":PULSE2:DELAY {self.delay}")
 
         # self.pulseGen.write(":PULSE3:STATE ON")  # uses channel C=2 : Belkhe
@@ -68,8 +68,8 @@ class pulseGenerator:
 
         if self.trigger == 'TRIG':
             self.pulseGen.write(f":PULSE:TRIG:MODE {self.trigger}")
-            self.pulseGen.write(f":PULS:EXT:LEV 1")
-            self.pulseGen.write(f":PULS:EXT:EDGE RIS")
+            self.pulseGen.write(f":PULS:TRIG:LEV 1.5")
+            self.pulseGen.write(f":PULS:TRIG:EDGE RIS")
         else:
             self.pulseGen.write(f":PULSE:TRIG:MODE {self.trigger}")
             self.pulseGen.write(":PULSE0:EXT:MODE DIS")
@@ -85,6 +85,9 @@ class pulseGenerator:
         #     # self.pulseGen.write(":PULSE0:STATE ON")
         #     time.sleep(0.2)
         # # print(self.mode)
+    
+    def quickStop(self):
+        self.pulseGen.write(":PULSE0:STATE OFF")
 
     def stop(self):
         self.pulseGen.write(":PULSE0:STATE OFF")
@@ -106,10 +109,16 @@ class pulseGenerator:
         self.pulseGen.write(":PULSE7:STATE OFF")
         self.pulseGen.write(":PULSE8:STATE OFF")
 
+    
+    def start_trigger(self):
+        self.pulseGen.write(f":PULSE:TRIG:MODE TRIG")
+        self.pulseGen.write(f":PULS:EXT:LEV 1.5")
+        self.pulseGen.write(f":PULS:EXT:EDGE RIS")
 
-        
+    def stop_trigger(self):
+        self.pulseGen.write(":PULSE:TRIG:MODE DIS")
 
-def woutTrigger():
+def trigger_test():
     "Test Function"
     gen = pulseGenerator()
     gen.width = 1
@@ -117,15 +126,34 @@ def woutTrigger():
     gen.delay = 0
     gen.trigger = 'DIS'
 
+    gen.setup()
+
+    time.sleep(1)
+
+    gen.start_trigger()
+    time.sleep(0.2)
+    # gen.stop_trigger()
+        
+
+def woutTrigger_test():
+    "Test Function"
+    gen = pulseGenerator()
+    gen.width = 1
+    gen.mode = 'NORM'
+    gen.delay = 0
+    gen.trigger = 'DIS'
+
+    gen.setup()
+
     # print(gen.trigger)
 
     gen.run()
 
-    time.sleep(10)
+    time.sleep(5)
     gen.stop()
     # gen.close()
 
-def wTrigger():
+def wTrigger_test():
     "Test Function"
     gen = pulseGenerator()
     gen.width = 0.02
@@ -142,3 +170,5 @@ def wTrigger():
 
 # gen =pulseGenerator()
 # gen.run()
+
+trigger_test()
